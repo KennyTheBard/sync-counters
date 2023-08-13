@@ -1,0 +1,27 @@
+version: "3.7"
+
+services:
+    cache:
+        image: redis:6.2-alpine
+        restart: always
+        ports:
+            - '6379:6379'
+        command: redis-server --save 20 1 --loglevel warning --maxmemory-policy allkeys-lru
+
+    db:
+        image: postgres
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: password
+            POSTGRES_DB: counter_db
+            TZ: Europe/Bucharest
+            PGTZ: Europe/Bucharest
+        ports:
+            - "5432:5432"
+        volumes:
+            - db:/var/lib/postgresql/data
+            - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+volumes:
+    db:
+        driver: local

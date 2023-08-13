@@ -17,7 +17,7 @@ export class RestController {
         req: express.Request,
         res: express.Response
     ) => {
-        const state = this.syncService.getState();
+        const state = await this.syncService.getState();
         res.status(200).json(state);
     };
 }

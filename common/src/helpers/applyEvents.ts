@@ -65,5 +65,5 @@ export const applyEvents = (
                 break;
         }
     }
-    return result;
+    return result.sort((c1, c2) => c1.createdAt - c2.createdAt);
 };

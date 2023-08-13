@@ -4,10 +4,36 @@ import cors from "cors";
 import { appConfig } from "./config";
 import { RestController, SocketController } from "./controllers";
 import { SynchronizationService } from "./services";
+import { RedisCache } from "./cache";
+import { Counter, SyncEvent, WithTimestamp } from "common";
+import Redis from "ioredis";
+import { CounterModel } from "./model";
 
 const bootstrap = async () => {
+    // init caches
+    const redisConnection = new Redis(appConfig.redis);
+    const counterCache = new RedisCache<Counter>("counter", redisConnection, {
+        expirationSeconds: 10 * 60,
+    });
+    const eventsCache = new RedisCache<WithTimestamp<SyncEvent>>(
+        "events",
+        redisConnection,
+        {
+            expirationSeconds: 10 * 60,
+        }
+    );
+
+    // load counters from database
+    const counters = await CounterModel.findAll();
+    await counterCache.setMulti(
+        counters.reduce((acc, counter) => {
+            acc[counter.uuid] = counter.toDto();
+            return acc;
+        }, {} as Record<string, Counter>)
+    );
+
     // init services
-    const syncService = new SynchronizationService();
+    const syncService = new SynchronizationService(counterCache, eventsCache);
 
     // init server
     const app = express();
@@ -24,7 +50,7 @@ const bootstrap = async () => {
 
     // start event squash cron
     setInterval(() => {
-        syncService.squashEvents(new Date().getTime() - 30 * 1000)
+        syncService.squashEvents(new Date().getTime() - 30 * 1000);
     }, 30 * 1000); // TODO: configure interval from AppConfig
 
     // start server

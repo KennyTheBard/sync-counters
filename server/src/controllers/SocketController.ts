@@ -10,7 +10,7 @@ export class SocketController {
 
     public setup = (server: Server) => {
         const io = new SocketIOServer(server, {
-            path: "/socket.io",
+            path: "/socket.io", // it's default, but it's easier tp have it here
             cors: {
                 origin: "*",
             },
@@ -28,9 +28,9 @@ export class SocketController {
         console.log("Client connected");
     };
 
-    private onMessage = (io: SocketIOServer) => (data: any) => {
+    private onMessage = (io: SocketIOServer) => async (data: any) => {
         console.log(data);
-        const event = this.syncService.registerEvent(data as SyncEvent);
+        const event = await this.syncService.registerEvent(data as SyncEvent);
         io.emit("event", event);
     };
 
