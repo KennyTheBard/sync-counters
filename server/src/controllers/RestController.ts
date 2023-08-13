@@ -1,7 +1,10 @@
 import express, { Router } from "express";
+import { SynchronizationService } from "../services";
 
 export class RestController {
-    constructor() {}
+    constructor(
+        private readonly syncService: SynchronizationService
+    ) {}
 
     public setup = (app: Router) => {
         const router = express.Router();
@@ -13,5 +16,8 @@ export class RestController {
     private getCurrentState = async (
         req: express.Request,
         res: express.Response
-    ) => {};
+    ) => {
+        const state = this.syncService.getState();
+        res.status(200).json(state);
+    };
 }

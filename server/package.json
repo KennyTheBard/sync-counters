@@ -11,6 +11,7 @@
     "author": "KennyTheBard",
     "license": "MIT",
     "dependencies": {
+        "common": "file:../common",
         "cors": "^2.8.5",
         "dotenv": "^16.3.1",
         "env-var": "^7.3.1",

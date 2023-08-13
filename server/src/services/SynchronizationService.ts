@@ -1,4 +1,4 @@
-import { Client, Counter, Event, EventWithTimestamp } from "../models";
+import { Client, Counter, EventWithTimestamp, SyncEvent, SynchronizationState } from "common";
 
 export class SynchronizationService {
     private counters: Counter[] = [];
@@ -13,14 +13,14 @@ export class SynchronizationService {
         };
     };
 
-    public pushEvent = (event: Event): void => {
+    public pushEvent = (event: SyncEvent): void => {
         this.events.push({
             ...event,
             emittedAt: new Date().getTime(),
         });
     };
 
-    public getEvents = (): (Event & {
+    public getEvents = (): (SyncEvent & {
         clients: Client["uuid"];
     })[] => {
         return [];
@@ -33,7 +33,9 @@ export class SynchronizationService {
         for (const event of eventsToSquash) {
             switch (event.type) {
                 case "connected":
-                    this.clients.push(event.client);
+                    this.clients.push({
+                        uuid: event.clientUuid
+                    });
                     break;
 
                 case "disconnected":
@@ -103,9 +105,3 @@ export class SynchronizationService {
         }
     };
 }
-
-export type SynchronizationState = {
-    counters: Counter[];
-    clients: Client[];
-    events: EventWithTimestamp[];
-};

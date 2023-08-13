@@ -7,7 +7,7 @@ import { SynchronizationService } from "./services";
 
 const bootstrap = async () => {
     // init services
-    const synchronizationService = new SynchronizationService();
+    const syncService = new SynchronizationService();
 
     // init server
     const app = express();
@@ -15,8 +15,8 @@ const bootstrap = async () => {
     const server = http.createServer(app);
 
     // init controllers
-    const restController = new RestController();
-    const socketController = new SocketController();
+    const restController = new RestController(syncService);
+    const socketController = new SocketController(syncService);
 
     // register routes
     restController.setup(app);
@@ -24,7 +24,7 @@ const bootstrap = async () => {
 
     // start event squash cron
     setInterval(() => {
-        synchronizationService.squashEvents(new Date().getTime() - 30 * 1000)
+        syncService.squashEvents(new Date().getTime() - 30 * 1000)
     }, 30 * 1000); // TODO: configure interval from AppConfig
 
     // start server

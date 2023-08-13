@@ -1,10 +1,18 @@
 import { Server } from "http";
 import { Server as SocketIOServer, Socket } from "socket.io";
+import { SynchronizationService } from "../services";
+import { SyncEvent, ClientConnected, ClientDisconnected } from "common";
+import { randomUUID } from "crypto";
 
 export class SocketController {
+    constructor(private readonly syncService: SynchronizationService) {}
+
     public setup = (server: Server) => {
         const io = new SocketIOServer(server, {
-            path: "/socket",
+            path: "/socket.io",
+            cors: {
+                origin: "*",
+            },
         });
         io.on("connection", (socket: Socket) => {
             this.onConnect(io)();
@@ -16,12 +24,25 @@ export class SocketController {
     };
 
     private onConnect = (io: SocketIOServer) => () => {
-        // io.sockets.
+        console.log("Client connected");
+        this.syncService.pushEvent({
+            type: "connected",
+            emittedAt: new Date().getTime(),
+            clientUuid: randomUUID(),
+        } as ClientConnected);
     };
 
     private onMessage = (io: SocketIOServer) => (data: any) => {
-        io.emit("message", data);
+        console.log(data);
+        this.syncService.pushEvent(data as SyncEvent);
     };
 
-    private onDisconnect = (io: SocketIOServer) => () => {};
+    private onDisconnect = (io: SocketIOServer) => () => {
+        console.log("Client disconnected");
+        this.syncService.pushEvent({
+            type: "disconnected",
+            emittedAt: new Date().getTime(),
+            clientUuid: randomUUID(),
+        } as ClientDisconnected);
+    };
 }
