@@ -1,6 +1,6 @@
 import { Button, Group } from "@mantine/core";
 
-export type CounterProps = {
+export type CounterCardProps = {
     counter: {
         uuid: string;
         value: number;
@@ -11,7 +11,7 @@ export type CounterProps = {
     onDelete: () => void;
 };
 
-export const Counter: React.FC<CounterProps> = (props: CounterProps) => {
+export const CounterCard: React.FC<CounterCardProps> = (props: CounterCardProps) => {
     return (
         <Group key={props.counter.uuid}>
             {props.counter.name}

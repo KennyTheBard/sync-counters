@@ -1,9 +1,8 @@
-import { Client } from "./client";
+import { WithTimestamp } from "./WithTimestamp";
 import { Counter } from "./counter";
-import { EventWithTimestamp } from "./events";
+import { SyncEvent } from "./events";
 
 export type SynchronizationState = {
     counters: Counter[];
-    clients: Client[];
-    events: EventWithTimestamp[];
+    events: WithTimestamp<SyncEvent>[];
 };

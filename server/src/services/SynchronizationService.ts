@@ -1,56 +1,36 @@
-import { Client, Counter, EventWithTimestamp, SyncEvent, SynchronizationState } from "common";
+import {
+    Counter,
+    SyncEvent,
+    SynchronizationState,
+    WithTimestamp,
+} from "common";
 
 export class SynchronizationService {
     private counters: Counter[] = [];
-    private clients: Client[] = [];
-    private events: EventWithTimestamp[] = [];
+    private events: WithTimestamp<SyncEvent>[] = [];
 
     public getState = (): SynchronizationState => {
         return {
             counters: this.counters,
-            clients: this.clients,
             events: this.events,
         };
     };
 
-    public pushEvent = (event: SyncEvent): void => {
-        this.events.push({
+    public registerEvent = (event: SyncEvent): WithTimestamp<SyncEvent> => {
+        const eventWithTimestamp = {
             ...event,
-            emittedAt: new Date().getTime(),
-        });
-    };
-
-    public getEvents = (): (SyncEvent & {
-        clients: Client["uuid"];
-    })[] => {
-        return [];
+            ts: new Date().getTime(),
+        };
+        this.events.push(eventWithTimestamp);
+        return eventWithTimestamp;
     };
 
     public squashEvents = (olderThanTs: number) => {
         const eventsToSquash = this.events.filter(
-            (event) => event.emittedAt < olderThanTs
+            (event) => event.ts < olderThanTs
         );
         for (const event of eventsToSquash) {
             switch (event.type) {
-                case "connected":
-                    this.clients.push({
-                        uuid: event.clientUuid
-                    });
-                    break;
-
-                case "disconnected":
-                    const clientIndexToDelete = this.clients.findIndex(
-                        (client) => client.uuid === event.clientUuid
-                    );
-                    if (clientIndexToDelete < 0) {
-                        console.error(
-                            `Client ${event.clientUuid} doesn't exists`
-                        );
-                        break;
-                    }
-                    this.clients.splice(clientIndexToDelete, 1);
-                    break;
-
                 case "create":
                     this.counters.push({
                         ...event.creationData,
@@ -94,12 +74,7 @@ export class SynchronizationService {
                         );
                         break;
                     }
-                    this.counters.splice(
-                        this.counters.findIndex(
-                            (counter) => counter.uuid === event.counterUuid
-                        ),
-                        1
-                    );
+                    this.counters.splice(counterIndexToDelete, 1);
                     break;
             }
         }

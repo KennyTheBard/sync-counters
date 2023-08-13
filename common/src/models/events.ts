@@ -1,48 +1,32 @@
-import { Client, Counter } from ".";
+import { Counter } from ".";
 
-export type SyncEvent = {
-    clientUuid: string;
+export type BaseEvent = {
+    uuid: string;
     type: string;
-} & (ClientEvent | DataEvent);
-
-export type EventWithTimestamp = SyncEvent & {
-    emittedAt: number;
 };
 
-export type ClientEvent = ClientConnected | ClientDisconnected;
-
-export type ClientConnected = {
-    type: "connected";
-    clientUuid: Client["uuid"];
-};
-
-export type ClientDisconnected = {
-    type: "disconnected";
-    clientUuid: Client["uuid"];
-};
-
-export type DataEvent =
+export type SyncEvent =
     | CreateCounterEvent
     | IncrementCounterEvent
     | DecrementCounterEvent
     | DeleteCounterEvent;
 
-export type CreateCounterEvent = {
+export type CreateCounterEvent = BaseEvent & {
     type: "create";
     creationData: Omit<Counter, "value">;
 };
 
-export type IncrementCounterEvent = {
+export type IncrementCounterEvent = BaseEvent & {
     type: "increment";
     counterUuid: Counter["uuid"];
 };
 
-export type DecrementCounterEvent = {
+export type DecrementCounterEvent = BaseEvent & {
     type: "decrement";
     counterUuid: Counter["uuid"];
 };
 
-export type DeleteCounterEvent = {
+export type DeleteCounterEvent = BaseEvent & {
     type: "delete";
     counterUuid: Counter["uuid"];
 };
