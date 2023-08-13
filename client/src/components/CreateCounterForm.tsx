@@ -21,7 +21,6 @@ export const CreateCounterForm: React.FC<CreateCounterFormProps> = (
                         console.error('Empty ref')
                         return;
                     }
-                    console.log(counterName.value);
                     props.onCreate(counterName.value);
                     counterName.value = '';
                 }}

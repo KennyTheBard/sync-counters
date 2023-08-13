@@ -3,6 +3,7 @@ import {
     SyncEvent,
     SynchronizationState,
     WithTimestamp,
+    applyEvents,
 } from "common";
 
 export class SynchronizationService {
@@ -26,57 +27,16 @@ export class SynchronizationService {
     };
 
     public squashEvents = (olderThanTs: number) => {
-        const eventsToSquash = this.events.filter(
-            (event) => event.ts < olderThanTs
-        );
-        for (const event of eventsToSquash) {
-            switch (event.type) {
-                case "create":
-                    this.counters.push({
-                        ...event.creationData,
-                        value: 0,
-                    });
-                    break;
-
-                case "increment":
-                    const counterToIncrement = this.counters.find(
-                        (counter) => counter.uuid === event.counterUuid
-                    );
-                    if (!counterToIncrement) {
-                        console.error(
-                            `Counter ${event.counterUuid} doesn't exists`
-                        );
-                        break;
-                    }
-                    counterToIncrement.value += 1;
-                    break;
-
-                case "decrement":
-                    const counterToDecrement = this.counters.find(
-                        (counter) => counter.uuid === event.counterUuid
-                    );
-                    if (!counterToDecrement) {
-                        console.error(
-                            `Counter ${event.counterUuid} doesn't exists`
-                        );
-                        break;
-                    }
-                    counterToDecrement.value -= 1;
-                    break;
-
-                case "delete":
-                    const counterIndexToDelete = this.counters.findIndex(
-                        (counter) => counter.uuid === event.counterUuid
-                    );
-                    if (counterIndexToDelete < 0) {
-                        console.error(
-                            `Counter ${event.counterUuid} doesn't exists`
-                        );
-                        break;
-                    }
-                    this.counters.splice(counterIndexToDelete, 1);
-                    break;
+        const oldEvents: WithTimestamp<SyncEvent>[] = [],
+            recentEvents: WithTimestamp<SyncEvent>[] = [];
+        for (const event of this.events) {
+            if (event.ts < olderThanTs) {
+                oldEvents.push(event);
+            } else {
+                recentEvents.push(event);
             }
         }
+        this.counters = applyEvents(this.counters, oldEvents);
+        this.events = recentEvents;
     };
 }

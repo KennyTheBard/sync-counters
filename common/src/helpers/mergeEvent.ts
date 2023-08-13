@@ -1,27 +1,20 @@
 import { WithTimestamp, SyncEvent } from "../models";
 
 export const mergeEvents = (
-    eventList1: WithTimestamp<SyncEvent>[],
-    eventList2: WithTimestamp<SyncEvent>[]
+    serverEvents: WithTimestamp<SyncEvent>[],
+    clientEvents: WithTimestamp<SyncEvent>[]
 ): WithTimestamp<SyncEvent>[] => {
-    const events: WithTimestamp<SyncEvent>[] = [];
+    const events: WithTimestamp<SyncEvent>[] = [...serverEvents];
 
-    if (!eventList1) {
-        return [...eventList2];
-    }
-    if (!eventList2) {
-        return [...eventList1];
-    }
-    let index1 = 0,
-        index2 = 0;
-    while (index1 < eventList1.length && index2 < eventList2.length) {
-        if (eventList1[index1].ts < eventList2[index2].ts) {
-            events.push(eventList1[index1]);
-            index1++;
-        } else {
-            events.push(eventList2[index2]);
-            index2++;
+    for (const event of clientEvents) {
+        // ignore client events that have already been broadcasted by the server
+        if (
+            events.find((existingEvents) => existingEvents.uuid === event.uuid)
+        ) {
+            continue;
         }
+
+        events.push(event);
     }
-    return events;
+    return events.sort((e1, e2) => e1.ts - e2.ts);
 };

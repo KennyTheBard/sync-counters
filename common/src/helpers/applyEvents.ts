@@ -1,11 +1,24 @@
 import cloneDeep from "lodash.clonedeep";
 import { Counter, SyncEvent, WithTimestamp } from "../models";
 
-export const applyEvents = (counter: Counter[], events: WithTimestamp<SyncEvent>[]): Counter[] => {
+export const applyEvents = (
+    counter: Counter[],
+    events: WithTimestamp<SyncEvent>[]
+): Counter[] => {
     const result = cloneDeep(counter);
     for (const event of events) {
         switch (event.type) {
             case "create":
+                if (
+                    result.find(
+                        (counter) => counter.uuid === event.creationData.uuid
+                    )
+                ) {
+                    console.error(
+                        `Counter ${event.creationData.uuid} already exists`
+                    );
+                    break;
+                }
                 result.push({
                     ...event.creationData,
                     value: 0,
@@ -53,4 +66,4 @@ export const applyEvents = (counter: Counter[], events: WithTimestamp<SyncEvent>
         }
     }
     return result;
-}
+};

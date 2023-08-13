@@ -11,14 +11,16 @@ export type CounterCardProps = {
     onDelete: () => void;
 };
 
-export const CounterCard: React.FC<CounterCardProps> = (props: CounterCardProps) => {
+export const CounterCard: React.FC<CounterCardProps> = (
+    props: CounterCardProps
+) => {
     return (
-        <Group key={props.counter.uuid}>
-            {props.counter.name}
-            {props.counter.value}
-            <Button onClick={props.onIncrement}>-1</Button>
-            <Button onClick={props.onDecrement}>+1</Button>
+        <Group m={10}>
+            <Button color="green" onClick={props.onIncrement}>+1</Button>
+            <Button color="red" onClick={props.onDecrement}>-1</Button>
             <Button onClick={props.onDelete}>Delete</Button>
+            {props.counter.name}
+            <strong>{props.counter.value}</strong>
         </Group>
     );
 };
