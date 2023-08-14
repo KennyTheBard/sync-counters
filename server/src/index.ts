@@ -39,11 +39,15 @@ const bootstrap = async () => {
     // init server
     const app = express();
     app.use(cors());
-    const clientPath = path.join(__dirname, "..", "..", "..", "client", "build");
+    const clientPath = path.join(
+        __dirname,
+        "..",
+        "..",
+        "..",
+        "client",
+        "build"
+    );
     app.use(express.static(clientPath));
-    app.get("*", (req: Request, res: Response) => {
-        res.sendFile(path.join(clientPath, "index.html"));
-    });
     const server = http.createServer(app);
 
     // init controllers
@@ -53,6 +57,9 @@ const bootstrap = async () => {
     // register routes
     restController.setup(app);
     socketController.setup(server);
+    app.get("*", (req: Request, res: Response) => {
+        res.sendFile(path.join(clientPath, "index.html"));
+    });
 
     // start event squash cron
     setInterval(() => {
