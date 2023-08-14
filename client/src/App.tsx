@@ -17,6 +17,7 @@ import {
 import { CounterCard } from "./components/CounterCard";
 import { v4 as uuid } from "uuid";
 import { CreateCounterForm } from "./components/CreateCounterForm";
+import { BACKEND_URL } from "./utils";
 
 function App() {
     const [socket, setSocket] = useState<Socket | null>(null);
@@ -29,15 +30,15 @@ function App() {
     const [currentState, setCurrentState] = useState<Counter[]>([]);
 
     useEffect(() => {
-        axios.get("http://localhost:3000/rest").then((response) => {
+        axios.get(`${BACKEND_URL}/rest`).then((response) => {
             setSyncState(response.data);
-            setSocket(io("http://localhost:3000"));
+            setSocket(io(`${BACKEND_URL}`));
         });
     }, []);
 
     useEffect(() => {
         if (socket === null) {
-            console.error("Websocket connection has net been initialized");
+            console.error("Websocket connection has not been initialized");
             return;
         }
         socket.on("event", (event: WithTimestamp<SyncEvent>) => {
@@ -160,7 +161,7 @@ function App() {
 
     const downloadCounters = async () => {
         try {
-            const response = await axios.get("http://localhost:3000/rest/download");
+            const response = await axios.get(`${BACKEND_URL}/rest/download`);
             const counters: Counter[] = response.data;
 
             const blob = new Blob(counters.map(c => `${c.name}: ${c.value}\n`), { type: 'text/plain' });
