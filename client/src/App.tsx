@@ -178,7 +178,7 @@ function App() {
     return (
         <Container>
             <h1>Synchronized Counters</h1>
-            <Button onClick={downloadCounters}>
+            <Button onClick={downloadCounters} m={10}>
                 Download all
             </Button>
             {currentState.map((counter) => (

@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Request, Response } from "express";
 import http from "http";
 import cors from "cors";
 import { appConfig } from "./config";
@@ -8,6 +8,7 @@ import { RedisCache } from "./cache";
 import { Counter, SyncEvent, WithTimestamp } from "common";
 import Redis from "ioredis";
 import { CounterModel } from "./model";
+import path from "path";
 
 const bootstrap = async () => {
     // init caches
@@ -38,6 +39,11 @@ const bootstrap = async () => {
     // init server
     const app = express();
     app.use(cors());
+    const clientPath = path.join(__dirname, "..", "..", "..", "client", "build");
+    app.use(express.static(clientPath));
+    app.get("*", (req: Request, res: Response) => {
+        res.sendFile(path.join(clientPath, "index.html"));
+    });
     const server = http.createServer(app);
 
     // init controllers
