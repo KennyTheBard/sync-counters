@@ -5,7 +5,7 @@
     "scripts": {
         "compile": "tsc",
         "compile:watch": "tsc -w",
-        "start:local": "nodemon -r dotenv/config build/src/index.js dotenv_config_path=.env.local",
+        "start:local": "nodemon -r dotenv/config build/src/index.js dotenv_config_path=.env",
         "start": "node build/src/index.js"
     },
     "author": "KennyTheBard",

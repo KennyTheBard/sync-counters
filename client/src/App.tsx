@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Container } from "@mantine/core";
+import { Button, Container } from "@mantine/core";
 import io, { Socket } from "socket.io-client";
 import axios from "axios";
 import {
@@ -158,9 +158,29 @@ function App() {
         });
     };
 
+    const downloadCounters = async () => {
+        try {
+            const response = await axios.get("http://localhost:3000/rest/download");
+            const counters: Counter[] = response.data;
+
+            const blob = new Blob(counters.map(c => `${c.name}: ${c.value}\n`), { type: 'text/plain' });
+            const blobUrl = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = blobUrl;
+            a.download = 'download.txt';
+            a.click();      
+            URL.revokeObjectURL(blobUrl);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
     return (
         <Container>
-            <h1>Distributed counters</h1>
+            <h1>Synchronized Counters</h1>
+            <Button onClick={downloadCounters}>
+                Download all
+            </Button>
             {currentState.map((counter) => (
                 <CounterCard
                     key={counter.uuid}
